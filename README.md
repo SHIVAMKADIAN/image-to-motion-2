@@ -107,8 +107,16 @@ into a Claude skills folder as-is.
 
 Model facts (parameter names, limits, versions) drift. The skills note where to verify against current docs.
 
+## Project collections
+
+Whole productions can live in the library as tagged entries. `krishna-vachan` holds a 21-clip, 30-second-per-clip
+Seedance series, two alternate Scene 5 clips and 18 character-sheet prompts, stored verbatim
+(`node src/cli.js search -t krishna-vachan`). The reusable parts were extracted into story-free templates and methods
+(`template/timed-multi-shot-clip-prompt`, `template/four-view-character-sheet`,
+`method/spatial-lock-left-right-geography`, `method/final-state-handoff-between-clips`, …) — see `skills/seedance-2`.
+
 ## Provenance
 
-Seeded from the creator handover guide (script → shots → Seedance prompts, continuity and fix tables) and
+Seeded from the creator handover guide, the Krishna-film production prompts (script → shots → Seedance prompts, continuity and fix tables) and
 the Higgsfield skills (MCSLA, camera presets, one-move rule, hero-frame workflow). Entries derived from them
 carry `source:`. Everything else is original seed content meant to be edited.

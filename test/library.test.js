@@ -130,3 +130,19 @@ test('every entry id referenced in skills exists', () => {
 test('every model profile has a skill', () => {
   for (const m of lib.models) assert.ok(fs.existsSync(path.join(ROOT, 'skills', m.id, 'SKILL.md')), m.id);
 });
+
+test('krishna-vachan project: 21 clips, 18 sheets, intact and tagged', () => {
+  const project = lib.entries.filter((e) => e.tags.includes('krishna-vachan'));
+  const clips = project.filter((e) => /^vachan-clip-\d\d-/.test(e.id.split('/')[1]) && !e.tags.includes('alt-version'));
+  assert.equal(clips.length, 21);
+  for (const c of clips) {
+    const n = c.tags.find((t) => /^clip-\d\d$/.test(t)).slice(5);
+    assert.match(c.body, new RegExp(`^PART 2 — CLIP ${n}: `));
+    for (const block of ['ATTACH IN THIS ORDER:', 'TIMED SHOTS:', 'FINAL STATE:']) assert.ok(c.body.includes(block), `${c.id} missing ${block}`);
+  }
+  assert.equal(project.filter((e) => e.tags.includes('alt-version')).length, 2);
+  const sheets = project.filter((e) => e.tags.includes('character-sheet'));
+  assert.equal(sheets.length, 18);
+  assert.equal(sheets.filter((e) => e.tags.includes('appearance-variant')).length, 6);
+  for (const s of sheets) assert.ok(/four clearly separated photographic views/.test(s.body), s.id);
+});

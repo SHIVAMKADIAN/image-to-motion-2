@@ -53,3 +53,18 @@ Library: `template/seedance-practical-prompt-order`, `template/single-character-
 `node src/cli.js compose -m seedance-2 -s "..." -u shot-size/... -u camera-movement/... -u negative/video-continuity`
 
 See also `method/continuity-check-after-every-generation`, `method/15-second-block-structure`, and the full example `full-prompt/raghav-whiskey-sequence-15s`.
+
+## Production-grade multi-character clips
+
+For long, multi-character, multi-shot clips (30s, several actors, doors/props, dialogue), use the full stack in
+`template/timed-multi-shot-clip-prompt` — each block prevents a specific drift (see `method/production-prompt-anatomy`).
+
+- Locations: `method/spatial-lock-left-right-geography`, `template/door-and-gate-swing-block`
+- Chaining clips: `method/final-state-handoff-between-clips`
+- Extras: `method/live-background-performance`
+- Speech: `template/dialogue-line-block-with-pronunciation`, `method/dialogue-and-pronunciation-rules`
+- Attachments: `method/reference-use-rules`
+- Infants/props: `method/infant-handling-continuity`
+- Character sheets: `template/four-view-character-sheet`, `template/character-sheet-appearance-variant`, `template/infant-reference-sheet`, `method/appearance-variant-chain`
+
+Worked example (21 clips + 18 sheets): everything tagged `krishna-vachan`, e.g. `node src/cli.js search -t krishna-vachan`.
