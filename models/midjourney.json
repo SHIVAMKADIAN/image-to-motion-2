@@ -1,0 +1,11 @@
+{
+  "id": "midjourney",
+  "name": "Midjourney",
+  "medium": ["image"],
+  "style": "tags",
+  "order": ["subject", "character", "action", "environment", "style", "mood", "lighting", "color-grade", "shot-size", "camera-angle", "lens", "composition"],
+  "paramDefaults": { "ar": "16:9", "v": "7" },
+  "suffix": " --ar {{ar}} --v {{v}}",
+  "negative": { "mode": "inline", "template": "--no {list}" },
+  "notes": "Comma-separated phrases, subject first. Parameters go last. Verify the current --v value and parameters in Midjourney docs."
+}

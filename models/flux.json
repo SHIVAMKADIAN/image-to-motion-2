@@ -1,0 +1,9 @@
+{
+  "id": "flux",
+  "name": "Flux",
+  "medium": ["image"],
+  "style": "tags",
+  "order": ["subject", "character", "action", "environment", "shot-size", "camera-angle", "lens", "composition", "lighting", "color-grade", "mood", "style"],
+  "negative": { "mode": "none" },
+  "notes": "Natural-language prose works best; no negative prompt — phrase exclusions positively (say 'clear sky', not 'no clouds')."
+}
