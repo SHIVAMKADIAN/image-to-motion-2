@@ -1,0 +1,23 @@
+{
+  "mediums": ["image", "video"],
+  "categories": {
+    "style":           { "group": "Look",     "label": "Art style",        "description": "Overall visual style or medium (photoreal, pixel art, Arcane-like painterly, anime...)." },
+    "lighting":        { "group": "Look",     "label": "Lighting",         "description": "Light quality, direction and source." },
+    "color-grade":     { "group": "Look",     "label": "Color grade",      "description": "Palette, grade and film-stock feel." },
+    "mood":            { "group": "Look",     "label": "Mood",             "description": "Emotional tone expressed in visible terms." },
+    "composition":     { "group": "Camera",   "label": "Composition",      "description": "How elements are arranged inside the frame." },
+    "shot-size":       { "group": "Camera",   "label": "Shot size",        "description": "How much of the subject is in frame (wide, medium, close-up...)." },
+    "camera-angle":    { "group": "Camera",   "label": "Camera angle",     "description": "Where the camera sits relative to the subject." },
+    "camera-movement": { "group": "Camera",   "label": "Camera movement",  "description": "How the camera moves during a video shot." },
+    "lens":            { "group": "Camera",   "label": "Lens & focus",     "description": "Focal length, depth of field, optical character." },
+    "subject":         { "group": "Content",  "label": "Subject",          "description": "Who or what is in the shot." },
+    "character":       { "group": "Content",  "label": "Character",        "description": "Character identity, costume and anchoring blocks." },
+    "environment":     { "group": "Content",  "label": "Environment",      "description": "Location, set and atmosphere." },
+    "action":          { "group": "Content",  "label": "Action",           "description": "What happens, described physically." },
+    "audio":           { "group": "Content",  "label": "Audio",            "description": "Ambience, SFX, dialogue and music cues for audio-capable models." },
+    "negative":        { "group": "Content",  "label": "Negative / avoid", "description": "Things that must not appear." },
+    "template":        { "group": "Reusable", "label": "Template",         "description": "Fill-in prompt skeletons with {{variables}}." },
+    "full-prompt":     { "group": "Reusable", "label": "Full prompt",      "description": "Complete, copy-paste-ready prompts." },
+    "method":          { "group": "Reusable", "label": "Method / workflow","description": "Workflows, checklists and techniques (not composed into prompts)." }
+  }
+}

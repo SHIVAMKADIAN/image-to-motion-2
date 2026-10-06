@@ -1,0 +1,9 @@
+{
+  "id": "seedance-2",
+  "name": "Seedance 2.0",
+  "medium": ["video"],
+  "style": "sentences",
+  "order": ["shot-size", "environment", "character", "subject", "action", "camera-angle", "camera-movement", "lens", "composition", "lighting", "color-grade", "audio", "mood", "style"],
+  "negative": { "mode": "inline", "template": "{list}" },
+  "notes": "Order follows the creator handover guide: duration/shot type, location, character, action, camera, timing, lighting, audio, performance, style, restrictions. Describe physical actions, not feelings."
+}
