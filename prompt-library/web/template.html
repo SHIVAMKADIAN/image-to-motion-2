@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Library</title>
+<style>
+:root{--bg:#f6f5f2;--panel:#fff;--ink:#1d1d1f;--mute:#6b6b70;--line:#e3e1db;--accent:#7a4dff;--accent-ink:#fff;--chip:#efece6;--warn:#b25b00}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#141416;--panel:#1d1d21;--ink:#ececef;--mute:#9a9aa3;--line:#2d2d33;--accent:#9b7bff;--accent-ink:#141416;--chip:#2a2a30;--warn:#f0a050}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header h1{font-size:16px;margin:0;font-weight:650}
+#q{flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit}
+#count{color:var(--mute);font-size:13px}
+main{display:grid;grid-template-columns:220px minmax(0,1fr) 340px;gap:16px;padding:16px;max-width:1500px;margin:0 auto;align-items:start}
+@media (max-width:1100px){main{grid-template-columns:1fr}aside{position:static!important;max-height:none!important}}
+aside{position:sticky;top:70px;max-height:calc(100vh - 86px);overflow:auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+h2{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:14px 0 6px;font-weight:600}
+h2:first-child{margin-top:0}
+.facet{display:flex;justify-content:space-between;width:100%;text-align:left;background:none;border:0;color:var(--ink);padding:4px 8px;border-radius:6px;cursor:pointer;font:inherit}
+.facet:hover{background:var(--chip)}.facet.on{background:var(--accent);color:var(--accent-ink)}
+.facet span:last-child{opacity:.6;font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{background:var(--chip);border-radius:999px;padding:1px 8px;font-size:12px;color:var(--mute);border:0;font-family:inherit}
+button.chip{cursor:pointer}button.chip.on{background:var(--accent);color:var(--accent-ink)}
+select,textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{resize:vertical}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.card h3{margin:0 0 4px;font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cat{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);font-weight:600}
+.body{white-space:pre-wrap;margin:6px 0;max-height:9.5em;overflow:hidden;position:relative;color:var(--ink)}
+.body.open{max-height:none}
+.meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.sp{flex:1}
+.btn{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:4px 10px;cursor:pointer;font:inherit;font-size:13px}
+.btn:hover{border-color:var(--accent)}.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.note{color:var(--mute);font-size:13px;margin:4px 0}
+.neg{color:var(--warn);font-size:13px}
+.picked{display:flex;justify-content:space-between;gap:6px;padding:3px 0;font-size:13px;border-bottom:1px dashed var(--line)}
+.out{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;min-height:120px}
+.warn{color:var(--warn);font-size:12px;margin:4px 0}
+.empty{color:var(--mute);text-align:center;padding:40px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Prompt Library</h1>
+  <input id="q" type="search" placeholder="Search styles, cameras, lighting, methods…  (try: pixel, dolly, noir)" autofocus>
+  <span id="count"></span>
+</header>
+<main>
+  <aside class="panel" id="facets"></aside>
+  <section id="results"></section>
+  <aside class="panel" id="composer"></aside>
+</main>
+<script id="data" type="application/json">__DATA__</script>
+<script type="module">
+/*__SHARED__*/
+
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const { entries, models, taxonomy } = DATA;
+const $ = (id) => document.getElementById(id);
+const h = (tag, attrs = {}, ...kids) => {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null) el.append(c);
+  return el;
+};
+// replaceChildren() stringifies arrays and null; flatten and drop empties first.
+const mount = (el, ...kids) => el.replaceChildren(...kids.flat(Infinity).filter((k) => k != null && k !== false && k !== ''));
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem('pl.' + k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('pl.' + k, JSON.stringify(v)); } catch {} },
+};
+
+const state = {
+  q: '', category: '', medium: '', tag: '', limit: 100,
+  model: store.get('model', models[0]?.id || ''),
+  subject: store.get('subject', ''),
+  picked: store.get('picked', []).filter((id) => entries.some((e) => e.id === id)),
+};
+const byId = new Map(entries.map((e) => [e.id, e]));
+
+async function copy(text, btn) {
+  try { await navigator.clipboard.writeText(text); }
+  catch { const t = h('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); }
+  const old = btn.textContent; btn.textContent = 'Copied ✓'; setTimeout(() => (btn.textContent = old), 1100);
+}
+
+function results() {
+  const f = { category: state.category, medium: state.medium, tag: state.tag };
+  return search(entries, state.q, f);
+}
+
+function renderFacets() {
+  const base = search(entries, state.q, { medium: state.medium, tag: state.tag });
+  const counts = {}; base.forEach((e) => (counts[e.category] = (counts[e.category] || 0) + 1));
+  const groups = {};
+  for (const [cat, meta] of Object.entries(taxonomy.categories)) (groups[meta.group] ||= []).push([cat, meta]);
+  const tagCounts = {};
+  search(entries, state.q, { category: state.category, medium: state.medium }).forEach((e) => e.tags.forEach((t) => (tagCounts[t] = (tagCounts[t] || 0) + 1)));
+  const topTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 36);
+  mount($('facets'),
+    h('button', { class: 'facet' + (!state.category ? ' on' : ''), onclick: () => set({ category: '' }) }, h('span', {}, 'All'), h('span', {}, String(base.length))),
+    ...Object.entries(groups).flatMap(([g, cats]) => [
+      h('h2', {}, g),
+      ...cats.map(([cat, meta]) => h('button', { class: 'facet' + (state.category === cat ? ' on' : ''), title: meta.description, onclick: () => set({ category: state.category === cat ? '' : cat }) }, h('span', {}, meta.label), h('span', {}, String(counts[cat] || 0)))),
+    ]),
+    h('h2', {}, 'Medium'),
+    h('div', { class: 'chips' }, ['image', 'video'].map((m) => h('button', { class: 'chip' + (state.medium === m ? ' on' : ''), onclick: () => set({ medium: state.medium === m ? '' : m }) }, m))),
+    h('h2', {}, 'Tags'),
+    h('div', { class: 'chips' }, topTags.map(([t, n]) => h('button', { class: 'chip' + (state.tag === t ? ' on' : ''), onclick: () => set({ tag: state.tag === t ? '' : t }) }, `${t} ${n}`))),
+  );
+}
+
+function card(e) {
+  const picked = state.picked.includes(e.id);
+  const body = h('div', { class: 'body' }, e.body);
+  const long = e.body.length > 420 || e.body.split('\n').length > 8;
+  return h('div', { class: 'card' },
+    h('h3', {}, e.title, h('span', { class: 'cat' }, taxonomy.categories[e.category]?.label || e.category)),
+    body,
+    long ? h('button', { class: 'btn', onclick: (ev) => { body.classList.toggle('open'); ev.target.textContent = body.classList.contains('open') ? 'Less' : 'More'; } }, 'More') : null,
+    e.negative ? h('div', { class: 'neg' }, 'Avoid: ' + e.negative) : null,
+    e.notes ? h('div', { class: 'note' }, e.notes) : null,
+    h('div', { class: 'meta' },
+      e.medium.map((m) => h('span', { class: 'chip' }, m)),
+      e.models.map((m) => h('span', { class: 'chip' }, m === 'any' ? 'any model' : m)),
+      e.tags.slice(0, 6).map((t) => h('button', { class: 'chip', onclick: () => set({ tag: t }) }, '#' + t)),
+      h('span', { class: 'sp' }),
+      h('button', { class: 'btn', onclick: (ev) => copy(e.body, ev.target) }, 'Copy'),
+      e.category !== 'method' ? h('button', { class: 'btn' + (picked ? '' : ' pri'), onclick: () => togglePick(e.id) }, picked ? 'Remove' : '+ Composer') : null,
+    ),
+  );
+}
+
+function renderResults() {
+  const hits = results();
+  $('count').textContent = `${hits.length} of ${entries.length} prompts`;
+  const el = $('results');
+  if (!hits.length) return mount(el, h('div', { class: 'empty' }, 'No prompts match. Clear a filter or try other words.'));
+  const shown = hits.slice(0, state.limit);
+  mount(el, shown.map(card),
+    hits.length > shown.length ? h('button', { class: 'btn', onclick: () => { state.limit += 100; renderResults(); } }, `Show more (${hits.length - shown.length} left)`) : null);
+}
+
+function renderComposer() {
+  const profile = models.find((m) => m.id === state.model);
+  const chosen = state.picked.map((id) => byId.get(id)).filter(Boolean);
+  const r = profile ? compose({ profile, entries: chosen, subject: state.subject }) : { prompt: '', negative: '', warnings: [], words: 0 };
+  const out = h('textarea', { class: 'out', readonly: '' }); out.value = r.prompt;
+  const subj = h('textarea', { rows: '3', placeholder: 'e.g. a tea-stall owner pouring chai at dawn' }); subj.value = state.subject;
+  subj.addEventListener('input', () => { state.subject = subj.value; store.set('subject', state.subject); updateOut(); });
+  const sel = h('select', { onchange: (ev) => { state.model = ev.target.value; store.set('model', state.model); renderComposer(); } },
+    models.map((m) => { const o = h('option', { value: m.id }, `${m.name} (${m.medium.join('/')})`); if (m.id === state.model) o.selected = true; return o; }));
+  const warnBox = h('div'), negBox = h('div'), wc = h('div', { class: 'note' });
+  function updateOut() {
+    const rr = compose({ profile, entries: state.picked.map((id) => byId.get(id)).filter(Boolean), subject: state.subject });
+    out.value = rr.prompt;
+    wc.textContent = `${rr.words} words`;
+    mount(warnBox, rr.warnings.map((w) => h('div', { class: 'warn' }, '⚠ ' + w)));
+    mount(negBox, rr.negative ? h('div', {}, h('h2', {}, 'Negative prompt'), h('div', { class: 'out neg' }, rr.negative), h('button', { class: 'btn', onclick: (ev) => copy(rr.negative, ev.target) }, 'Copy negative')) : '');
+  }
+  mount($('composer'),
+    h('h2', {}, 'Composer'),
+    sel,
+    profile?.notes ? h('div', { class: 'note' }, profile.notes) : null,
+    h('h2', {}, 'Subject'), subj,
+    h('h2', {}, `Fragments (${chosen.length})`),
+    chosen.length ? chosen.map((e) => h('div', { class: 'picked' }, h('span', {}, `${taxonomy.categories[e.category]?.label}: ${e.title}`), h('button', { class: 'chip', onclick: () => togglePick(e.id) }, '✕')))
+      : h('div', { class: 'note' }, 'Click “+ Composer” on any fragment — styles, cameras, lighting…'),
+    h('h2', {}, 'Prompt'), out, wc, warnBox, negBox,
+    h('div', { class: 'meta' },
+      h('button', { class: 'btn pri', onclick: (ev) => copy(out.value, ev.target) }, 'Copy prompt'),
+      h('button', { class: 'btn', onclick: () => { state.picked = []; store.set('picked', []); state.subject = ''; store.set('subject', ''); renderAll(); } }, 'Clear')),
+  );
+  updateOut();
+}
+
+function togglePick(id) {
+  const i = state.picked.indexOf(id);
+  if (i >= 0) state.picked.splice(i, 1); else state.picked.push(id);
+  store.set('picked', state.picked);
+  renderResults(); renderComposer();
+}
+function set(p) { Object.assign(state, p, { limit: 100 }); renderFacets(); renderResults(); }
+function renderAll() { renderFacets(); renderResults(); renderComposer(); }
+
+$('q').addEventListener('input', (ev) => set({ q: ev.target.value }));
+renderAll();
+</script>
+</body>
+</html>

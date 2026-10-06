@@ -1,0 +1,16 @@
+{
+  "name": "prompt-library",
+  "version": "0.1.0",
+  "description": "File-based library of image/video prompts: styles, cameras, lighting, methods, templates, and per-model skills.",
+  "type": "module",
+  "bin": { "pl": "src/cli.js" },
+  "scripts": {
+    "pl": "node src/cli.js",
+    "build": "node src/cli.js build",
+    "validate": "node src/cli.js validate",
+    "stats": "node src/cli.js stats",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT"
+}

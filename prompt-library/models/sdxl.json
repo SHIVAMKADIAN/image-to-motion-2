@@ -1,0 +1,9 @@
+{
+  "id": "sdxl",
+  "name": "Stable Diffusion / SDXL",
+  "medium": ["image"],
+  "style": "tags",
+  "order": ["subject", "character", "action", "environment", "style", "lighting", "color-grade", "mood", "shot-size", "camera-angle", "lens", "composition"],
+  "negative": { "mode": "separate" },
+  "notes": "Tag-style prompt plus a separate negative prompt. Weighting syntax such as (word:1.2) is UI-dependent (A1111/ComfyUI)."
+}

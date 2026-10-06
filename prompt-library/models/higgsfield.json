@@ -1,0 +1,10 @@
+{
+  "id": "higgsfield",
+  "name": "Higgsfield (MCSLA)",
+  "medium": ["video", "image"],
+  "style": "sentences",
+  "maxWords": 200,
+  "order": ["shot-size", "camera-angle", "camera-movement", "lens", "composition", "subject", "character", "action", "environment", "style", "lighting", "color-grade", "mood", "audio"],
+  "negative": { "mode": "inline", "template": "{list}" },
+  "notes": "MCSLA = Model, Camera, Subject, Look, Action. Under ~200 words. One primary camera move per shot. Prefer positive phrasing over negations."
+}
